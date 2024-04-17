@@ -7,7 +7,6 @@ from django.forms.widgets import PasswordInput,TextInput
 
 # register a user
 class CreateUserForm(UserCreationForm):
-
     class Meta:
         model = User
         fields = ['username', 'password1', 'password2']
