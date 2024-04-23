@@ -1,10 +1,12 @@
 from django.shortcuts import render ,redirect
-from .forms import CreateUserForm,LoginForm
+from .forms import CreateUserForm,LoginForm ,AddRecord,UpdateRecord
 
 from django.contrib import auth
 from django.contrib.auth import authenticate
 
 from django.contrib.auth.decorators import login_required
+
+from .models import Record
 
 
 def home(request):
@@ -50,7 +52,33 @@ def login(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request, 'webapp/dashboard.html')
+    records = Record.objects.all()
+
+    context = {
+        'records': records
+    }
+
+    return render(request, 'webapp/dashboard.html',context)
+
+
+@login_required(login_url='login')
+def create_record(request):
+
+    form = AddRecord()
+
+    if request.method == 'POST':
+        form = AddRecord(request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            return redirect('dashboard')
+        
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'webapp/create_record.html',context)
 
 
 def logout(request):
