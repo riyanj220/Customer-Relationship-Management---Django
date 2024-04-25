@@ -104,6 +104,14 @@ def view_record(request,pk):
 
     return render(request, 'webapp/view_record.html', {'record':all_records})
 
+
+@login_required(login_url='login')
+def delete_record(request,pk):
+    record = Record.objects.get(id=pk)
+    record.delete()
+    return redirect('dashboard')
+
+
 def logout(request):
     auth.logout(request)
     
