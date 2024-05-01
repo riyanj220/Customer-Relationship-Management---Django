@@ -55,7 +55,7 @@ def login(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    records = Record.objects.all()
+    records = Record.objects.filter(created_by=request.user)
 
     context = {
         'records': records
@@ -73,6 +73,8 @@ def create_record(request):
         form = AddRecord(request.POST)
 
         if form.is_valid():
+            record = form.save(commit=False)
+            record.created_by = request.user
             form.save()
 
             messages.success(request,"Record created successfully!")
