@@ -50,7 +50,7 @@ def login(request):
 
     context = {'form': form}
 
-    return render(request, 'webapp/login.html', context = context)
+    return render(request, 'webapp/login.html', context)
 
 
 @login_required(login_url='login')

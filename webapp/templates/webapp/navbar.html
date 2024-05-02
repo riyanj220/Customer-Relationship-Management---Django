@@ -1,11 +1,20 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary justify-content-center">
 
-    <a class="navbar-brand main-heading" href="{% url '' %}"> 
-            
+  {% if user.is_authenticated %}
+    <a class="navbar-brand main-heading" > 
+      
       &nbsp; ProjectX
-    
+  
     </a>
+
+  {% else %}
+    <a class="navbar-brand main-heading" href="{% url '' %}"> 
+      
+    &nbsp; ProjectX
+  
+   </a>
+  {% endif %}
   
   
     <button

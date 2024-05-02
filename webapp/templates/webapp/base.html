@@ -30,17 +30,16 @@
                 <!-- Notification messages -->  
                 
                 {% for message in messages %}
+                    <p id="message-timer" class="alert alert-success float-center text-center message-text"> 
+                    
+                        {% if message.tags == 'success' %}
+                            <i class="fa fa-check" aria-hidden="true"></i> &nbsp;
 
-                    {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                        {% endif %}
+                        
+                        {{ message }}
 
-                        <p id="message-timer" class="alert alert-success float-center text-center message-text"> 
-
-                            <i class="fa fa-check" aria-hidden="true"></i> &nbsp; {{message}}
-
-                        </p>
-
-                    {% endif %}
-
+                    </p>
                 {% endfor %}
 
 
