@@ -1,5 +1,5 @@
 {% extends 'webapp/base.html' %}
-
+{% load static %}
 {% block content %}
     <body>
 
@@ -8,17 +8,20 @@
 
         <div class="text-center">
 
-            <h3> ProjectX... Management at it's finest! </h3>
+            <h3 style="margin-top: -20px;"> ProjectX... Management at it's finest! </h3>
 
             <br>
 
-            <h5> Keep track of your records effectively! </h5>
+            <h5 style="margin-top: -10px;"> Keep track of your records effectively! </h5>
 
             <hr>
             <br>
 
-            <a class="btn btn-primary" type="button" href="{% url 'register' %}"> Create your account &nbsp; <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> </a>
-         
+            <!-- <div>
+                <a class="btn btn-primary" type="button" href="{% url 'register' %}"> Create your account &nbsp; <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> </a>
+            </div> -->
+            
+            <img src="{% static 'images/home_page.jpg' %}" alt="Project Management" class="img-fluid" style="width: 50%; height: auto; margin-top: 10px;">
         </div>
 
     </body>
