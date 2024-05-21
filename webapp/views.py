@@ -55,7 +55,7 @@ def login(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    records = Record.objects.filter(created_by=request.user)
+    records = Record.objects.filter(created_by=request.user).order_by('-creation_date')
 
     context = {
         'records': records
