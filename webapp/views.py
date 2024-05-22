@@ -1,4 +1,11 @@
 from django.shortcuts import render ,redirect
+
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView, CreateView, UpdateView, DetailView, ListView
+from django.contrib.auth.views import LoginView
+from django.contrib.auth import login
+
 from .forms import CreateUserForm,LoginForm ,AddRecord,UpdateRecord
 
 from django.contrib import auth
@@ -10,109 +17,79 @@ from .models import Record
 
 from django.contrib import messages
 
-def home(request):
-    return render(request,"webapp/index.html")
 
-def register(request):
-    form = CreateUserForm()
+class HomeView(TemplateView):
+    template_name = "webapp/index.html"
 
-    if request.method == "POST":
-        form = CreateUserForm(request.POST)
 
-        if form.is_valid():
-            form.save()
+class RegisterView(CreateView):
+    form_class = CreateUserForm
+    template_name = "webapp/register.html"
+    success_url = reverse_lazy('login')
 
-            messages.success(request,"Account created successfully!")
+    def form_valid(self, form):
+        messages.success(self.request, "Account created successfully!")
+        return super().form_valid(form)
 
-            return redirect('login')
+
+class CustomLoginView(LoginView):
+    form_class = LoginForm
+    template_name = 'webapp/login.html'
+    success_url = reverse_lazy('dashboard')
+
+    def get_success_url(self):
+        return self.success_url
     
-    context = {'form': form}
-
-    return render(request,"webapp/register.html",context = context)
-
-
-def login(request):
-    form = LoginForm()
-
-    if request.method == "POST":
-        form = LoginForm(request , data = request.POST)
-
-        if form.is_valid():
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-
-            user = authenticate(request , username = username, password = password)
-
-            if user is not None:
-                auth.login(request , user)
-
-                return redirect('dashboard')
-
-    context = {'form': form}
-
-    return render(request, 'webapp/login.html', context)
+    def form_valid(self, form):
+        user = authenticate(
+            request=self.request,
+            username=form.cleaned_data.get('username'),
+            password=form.cleaned_data.get('password')
+        )
+        if user is not None:
+            login(self.request, user)
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "Invalid username or password.")
+            return self.form_invalid(form)
 
 
-@login_required(login_url='login')
-def dashboard(request):
-    records = Record.objects.filter(created_by=request.user).order_by('-creation_date')
+class DashboardView(LoginRequiredMixin, ListView):
+    model = Record
+    template_name = 'webapp/dashboard.html'
+    context_object_name = 'records'
+    login_url = reverse_lazy('login')
 
-    context = {
-        'records': records
-    }
-
-    return render(request, 'webapp/dashboard.html',context)
-
-
-@login_required(login_url='login')
-def create_record(request):
-
-    form = AddRecord()
-
-    if request.method == 'POST':
-        form = AddRecord(request.POST)
-
-        if form.is_valid():
-            record = form.save(commit=False)
-            record.created_by = request.user
-            form.save()
-
-            messages.success(request,"Record created successfully!")
-
-            return redirect('dashboard')
-        
-    context = {
-        'form': form,
-    }
-
-    return render(request, 'webapp/create_record.html',context)
-
-
-@login_required(login_url='login')
-def update_record(request,pk):
-    record = Record.objects.get(id=pk)
-    form = UpdateRecord(instance=record)
-
-    if request.method == 'POST':
-        form = UpdateRecord(request.POST ,instance=record)
-
-        if form.is_valid():
-            form.save()
-
-            messages.success(request,"Record updated successfully!")
-
-            return redirect('dashboard')
+    def get_queryset(self):
+        return Record.objects.filter(created_by=self.request.user).order_by('-creation_date')
     
-    context = {'form': form}
 
-    return render(request, 'webapp/update_record.html', context)
+class RecordCreateView(LoginRequiredMixin, CreateView):
+    form_class = AddRecord
+    template_name = 'webapp/create_record.html'
+    success_url = reverse_lazy('dashboard')
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        messages.success(self.request, "Record created successfully!")
+        return super().form_valid(form)
 
 
-@login_required(login_url='login')
-def view_record(request,pk):
-    all_records = Record.objects.get(id=pk)
+class RecordUpdateView(LoginRequiredMixin, UpdateView):
+    model = Record
+    form_class = UpdateRecord
+    template_name = 'webapp/update_record.html'
+    success_url = reverse_lazy('dashboard')
 
-    return render(request, 'webapp/view_record.html', {'record':all_records})
+    def form_valid(self, form):
+        messages.success(self.request, "Record updated successfully!")
+        return super().form_valid(form)
+
+
+class RecordDetailView(LoginRequiredMixin, DetailView):
+    model = Record
+    template_name = 'webapp/view_record.html'
+    context_object_name = 'record'
 
 
 @login_required(login_url='login')
@@ -123,7 +100,6 @@ def delete_record(request,pk):
     messages.success(request,"Record deleted!")
 
     return redirect('dashboard')
-
 
 def logout(request):
     auth.logout(request)
