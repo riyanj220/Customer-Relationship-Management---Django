@@ -101,6 +101,7 @@ def delete_record(request,pk):
 
     return redirect('dashboard')
 
+
 def logout(request):
     auth.logout(request)
     
