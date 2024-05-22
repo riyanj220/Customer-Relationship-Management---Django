@@ -1,4 +1,4 @@
-#Features:
+# Features:
 
 🔐 User Authentication <br>
 📊 Personal Dashboard <br> 
