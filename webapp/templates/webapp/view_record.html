@@ -48,7 +48,12 @@
 
     &nbsp;
 
-    <a href="{% url 'delete_record' record.id %}" class="btn btn-danger"> Delete &nbsp;<i class="fa fa-minus-square" aria-hidden="true"></i> </a>
+    <form action="{% url 'delete_record' record.id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            Delete &nbsp;<i class="fa fa-minus-square" aria-hidden="true"></i>
+        </button>
+    </form>
 
 
 {% endblock %}

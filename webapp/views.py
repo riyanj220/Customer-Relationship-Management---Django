@@ -2,8 +2,8 @@ from django.shortcuts import render ,redirect
 
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, CreateView, UpdateView, DetailView, ListView
-from django.contrib.auth.views import LoginView
+from django.views.generic import TemplateView, CreateView, UpdateView, DetailView, ListView ,DeleteView
+from django.contrib.auth.views import LoginView,LogoutView
 from django.contrib.auth import login
 
 from .forms import CreateUserForm,LoginForm ,AddRecord,UpdateRecord
@@ -16,7 +16,6 @@ from django.contrib.auth.decorators import login_required
 from .models import Record
 
 from django.contrib import messages
-
 
 class HomeView(TemplateView):
     template_name = "webapp/index.html"
@@ -92,19 +91,21 @@ class RecordDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'record'
 
 
-@login_required(login_url='login')
-def delete_record(request,pk):
-    record = Record.objects.get(id=pk)
-    record.delete()
+class RecordDeleteView(LoginRequiredMixin, DeleteView):
+    model = Record
+    success_url = reverse_lazy('dashboard')
 
-    messages.success(request,"Record deleted!")
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        messages.success(request, "Record deleted!")
+        return redirect(self.success_url)
 
-    return redirect('dashboard')
 
+class CustomLogoutView(LogoutView):
+    next_page = reverse_lazy('login')
 
-def logout(request):
-    auth.logout(request)
-    
-    messages.success(request,"Account logged out !")
-
-    return redirect('login')
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        messages.success(request, "Account logged out!")
+        return response
